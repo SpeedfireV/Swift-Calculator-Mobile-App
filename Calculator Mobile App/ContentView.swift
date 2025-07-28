@@ -52,8 +52,7 @@ struct ContentView: View {
         VStack {
                 HStack {
                     ScrollView(.horizontal) {
-                        TextField("", text: $current_calculation, selection: $text_selection)
-                        TextField("Calculation", text: $current_calculation, prompt: Text("There is nothing here Yet!")).font(.largeTitle)
+                        TextField("", text: $current_calculation, selection: $text_selection).font(.largeTitle).accessibilityHint(Text("Enter Calculations Here"))
                     }
                     Spacer()
                     Button(action: {
@@ -66,94 +65,62 @@ struct ContentView: View {
             HStack(spacing: 48) {
                 Grid (horizontalSpacing: 16, verticalSpacing: 16){
                     GridRow {
-                        Button(action: {
+                        InputButton(action: {
                             current_calculation += "1"
-                        }) {
-                            Text("1").font(.largeTitle).frame(width: .infinity)
-                        }
-                        Button(action: {
+                        }, text: "1")
+                        InputButton(action: {
                             current_calculation += "2"
-                        }) {
-                            Text("2").font(.largeTitle).frame(width: .infinity)
-                        }
-                        Button(action: {
+                        }, text: "2")
+                        InputButton(action: {
                             current_calculation += "3"
-                        }) {
-                            Text("3").font(.largeTitle).frame(width: .infinity)
-                        }
-                        Button(action: {
+                        }, text: "3")
+                        InputButton(action: {
                             current_calculation += "x"
-                        }) {
-                            Text("X")
-                        }
+                        }, text: "X")
                     }.gridCellColumns(3)
                     GridRow {
-                        Button(action: {
+                        InputButton(action: {
                             current_calculation += "4"
-                        }) {
-                            Text("4").font(.largeTitle).frame(width: .infinity)
-                        }
-                        Button(action: {
+                        }, text: "4")
+                        InputButton(action: {
                             current_calculation += "5"
-                        }) {
-                            Text("5").font(.largeTitle).frame(width: .infinity)
-                        }
-                        Button(action: {
+                        }, text: "5")
+                        InputButton(action: {
                             current_calculation += "6"
-                        }) {
-                            Text("6").font(.largeTitle).frame(width: .infinity)
-                        }
-                        Button(action: {
+                        }, text: "6")
+                        InputButton(action: {
                             current_calculation += "-"
-                        }) {
-                            Text("-")
-                        }
+                        }, text: "-")
                     }.gridCellColumns(3)
                     GridRow {
-                        Button(action: {
+                        InputButton(action: {
                             current_calculation += "7"
-                        }) {
-                            Text("7").font(.largeTitle).frame(width: .infinity)
-                        }
-                        Button(action: {
+                        }, text: "7")
+                        InputButton(action: {
                             current_calculation += "8"
-                        }) {
-                            Text("8").font(.largeTitle).frame(width: .infinity)
-                        }
-                        Button(action: {
+                        }, text: "8")
+                        InputButton(action: {
                             current_calculation += "9"
-                        }) {
-                            Text("9").font(.largeTitle).frame(width: .infinity)
-                        }
-                        Button(action: {
+                        }, text: "9")
+                        InputButton(action: {
                             current_calculation += "+"
-                        }) {
-                            Text("+")
-                        }
+                        }, text: "+")
                     }.gridCellColumns(3)
                     GridRow {
-                        Button(action: {
+                        InputButton(action: {
                             current_calculation += "."
-                        }) {
-                            Text(".").font(.largeTitle).frame(width: .infinity)
-                        }
-                      
-                        Button(action: {
+                        }, text: ".")
+                        InputButton(action: {
                             current_calculation += "0"
-                        }) {
-                            Text("0").font(.largeTitle).frame(width: .infinity)
-                        }
+                        }, text: "0")
                         
-                        Button(action: {
+                        InputButton(action: {
                             current_calculation = String(calculate_output_string())
-                        }) {
-                            Text("=")
-                        }
-                        Button(action: {
+                        }, text: "=", color: .orange)
+                        
+                        InputButton(action: {
                             current_calculation += "/"
-                        }) {
-                            Text("/")
-                        }
+                        }, text: "/")
                     }.gridCellColumns(3)
                 }.frame(width: .infinity)
                
@@ -163,7 +130,23 @@ struct ContentView: View {
     }
     
     
+    private struct InputButton: View {
+        let action: () -> Void
+        let text: String
+        let color: Color?
         
+        init(action: @escaping () -> Void, text: String, color: Color? = nil) {
+            self.action = action
+            self.text = text
+            self.color = color
+        }
+        
+        var body: some View {
+            Button(action: action) {
+                Text(text).font(.largeTitle).frame(width: .infinity).foregroundStyle(color ?? .accentColor)
+            }
+        }
+    }
     
 }
 
