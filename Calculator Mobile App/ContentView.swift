@@ -8,17 +8,55 @@
 import SwiftUI
 
 struct ContentView: View {
+    
+    enum CalculationError: LocalizedError, Identifiable {
+        var id: String { errorDescription ?? UUID().uuidString }
+
+        case failed
+        case divideByZero
+        case invalidInput
+
+        var errorDescription: String? {
+            switch self {
+            case .failed:
+                return "Calculation failed."
+            case .divideByZero:
+                return "You can't divide by zero."
+            case .invalidInput:
+                return "Invalid input was provided."
+            }
+        }
+    }
     @State private var current_calculation: String = ""
     @State private var text_selection: TextSelection?
-    func calculate_output_string() -> String {
+    @State private var isErrorAlertPresent: Bool = false
+    @State private var calculationError: CalculationError = CalculationError.failed
+    
+    func showSnackbar(message: String) -> Void {
+        
+    }
+    
+    func calculateOutputString() throws -> String {
+        
         var final_output: Float = 0
         var math_operator: Character = "+"
         var current_number_string: String = ""
+        func divideNumbers(base: Float, divider: Float) throws -> Float {
+            guard divider != 0 else {
+                throw CalculationError.divideByZero
+            }
+            return base / divider
+        }
         for character: Character in current_calculation {
             if (48...57).contains(character.asciiValue!) || character == "."{
                 current_number_string.append(character)
             } else {
-                let current_number_float: Float = Float(current_number_string)!
+                
+                guard let current_number_float: Float = Float(current_number_string) else {
+                    throw CalculationError.invalidInput
+                }
+               
+                
                 if math_operator == "+" {
                     final_output += current_number_float
                 } else if math_operator == "x" {
@@ -26,14 +64,17 @@ struct ContentView: View {
                 } else if math_operator == "-" {
                     final_output -= current_number_float
                 } else if math_operator == "/" {
-                    final_output /= current_number_float
+                    try final_output = divideNumbers(base: final_output, divider: current_number_float)
                 }
                 current_number_string = ""
                 math_operator = character
                 
             }
         }
-        let current_number_float: Float = Float(current_number_string)!
+        
+        guard let current_number_float: Float = Float(current_number_string) else {
+            throw CalculationError.invalidInput
+        }
         if math_operator == "+" {
             final_output += current_number_float
         } else if math_operator == "x" {
@@ -41,7 +82,7 @@ struct ContentView: View {
         } else if math_operator == "-" {
             final_output -= current_number_float
         } else if math_operator == "/" {
-            final_output /= current_number_float
+            try final_output = divideNumbers(base: final_output, divider: current_number_float)
         }
         
         return String(String(final_output).prefix(12))
@@ -115,16 +156,26 @@ struct ContentView: View {
                         }, text: "0")
                         
                         InputButton(action: {
-                            current_calculation = String(calculate_output_string())
-                        }, text: "=", color: .orange)
+                            do {
+                             try current_calculation = String(calculateOutputString())
+                            } catch let error as CalculationError {
+                                isErrorAlertPresent = true
+                                calculationError = error
+                            } catch {
+                                isErrorAlertPresent = true
+                            }
+                        }, text: "=", color: .orange).alert(isPresented: $isErrorAlertPresent, error: calculationError) {
+                            Button("I will fix it!") {
+                                
+                            }
+                        }
                         
                         InputButton(action: {
                             current_calculation += "/"
                         }, text: "/")
                     }.gridCellColumns(3)
-                }.frame(width: .infinity)
-               
-            }.frame(width: .infinity).padding()
+                }
+            }
         }
 
     }
@@ -143,7 +194,7 @@ struct ContentView: View {
         
         var body: some View {
             Button(action: action) {
-                Text(text).font(.largeTitle).frame(width: .infinity).foregroundStyle(color ?? .accentColor)
+                Text(text).font(.largeTitle).foregroundStyle(color ?? .accentColor)
             }
         }
     }
